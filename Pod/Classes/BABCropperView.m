@@ -398,7 +398,7 @@ static UIImage* BABCropperViewCroppedAndScaledImageWithCropRect(UIImage *image, 
         self.firstTime = NO;
         CGRect frame = view.bounds;
         frame.size.width += 1.0f;
-        [self.scrollView zoomToRect:frame animated:YES];
+        [self.scrollView zoomToRect:frame animated:NO];
     }
 }
 
