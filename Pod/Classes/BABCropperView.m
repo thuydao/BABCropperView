@@ -138,6 +138,7 @@ static UIImage* BABCropperViewCroppedAndScaledImageWithCropRect(UIImage *image, 
 @property (nonatomic, assign) CGSize displayCropSize;
 @property (nonatomic, assign) CGRect displayCropRect;
 @property (nonatomic, strong) NSOperationQueue *operationQueue;
+@property (nonatomic, assign) BOOL firstTime;
 
 @end
 
@@ -211,6 +212,7 @@ static UIImage* BABCropperViewCroppedAndScaledImageWithCropRect(UIImage *image, 
     _image = image;
     _imageView.image = image;
     [_imageView sizeToFit];
+    _firstTime = YES;
     
     [self setNeedsLayout];
 }
@@ -289,14 +291,21 @@ static UIImage* BABCropperViewCroppedAndScaledImageWithCropRect(UIImage *image, 
             if(scrollViewHeight > scrollViewWidth && self.cropSize.width/self.cropSize.height < imageViewWidth/imageViewHeight) {
                 
                 self.scrollView.minimumZoomScale = minimumZoomScaleBasedOnHeight;
+                self.firstTime = NO;
             }
             else {
-                
-                self.scrollView.minimumZoomScale = minimumZoomScalescaleBasedOnWidth;
+                if (self.scrollView.minimumZoomScale == 1 || self.firstTime == YES)
+                {
+                    self.scrollView.minimumZoomScale = self.bounds.size.width/imageWidth;
+                }
+                else
+                {
+                    self.scrollView.minimumZoomScale = minimumZoomScalescaleBasedOnWidth;
+                }
             }
         }
         else { //landscape image
-            
+            self.firstTime = NO;
             if((scrollViewHeight >= scrollViewWidth) || (self.cropSize.width/self.cropSize.height < imageViewWidth/imageViewHeight)) {
                 
                 self.scrollView.minimumZoomScale = minimumZoomScaleBasedOnHeight;
@@ -382,6 +391,16 @@ static UIImage* BABCropperViewCroppedAndScaledImageWithCropRect(UIImage *image, 
 }
 
 #pragma mark - UIScrollViewDelegate
+
+- (void)scrollViewWillBeginZooming:(UIScrollView *)scrollView withView:(nullable UIView *)view
+{
+    if (self.firstTime) {
+        self.firstTime = NO;
+        CGRect frame = view.bounds;
+        frame.size.width += 1.0f;
+        [self.scrollView zoomToRect:frame animated:YES];
+    }
+}
 
 - (UIView *)viewForZoomingInScrollView:(UIScrollView *)scrollView {
     
