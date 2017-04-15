@@ -294,9 +294,10 @@ static UIImage* BABCropperViewCroppedAndScaledImageWithCropRect(UIImage *image, 
                 self.firstTime = NO;
             }
             else {
-                if (self.scrollView.minimumZoomScale == 1 || self.firstTime == YES)
+                if (self.scrollView.minimumZoomScale == 1 && self.firstTime == YES)
                 {
                     self.scrollView.minimumZoomScale = self.bounds.size.width/imageWidth;
+                    [self performSelector:@selector(reupdate) withObject:nil afterDelay:0.1];
                 }
                 else
                 {
@@ -392,15 +393,15 @@ static UIImage* BABCropperViewCroppedAndScaledImageWithCropRect(UIImage *image, 
 
 #pragma mark - UIScrollViewDelegate
 
-- (void)scrollViewWillBeginZooming:(UIScrollView *)scrollView withView:(nullable UIView *)view
-{
+- (void)reupdate {
     if (self.firstTime) {
         self.firstTime = NO;
-        CGRect frame = view.bounds;
-        frame.size.width += 1.0f;
+        CGRect frame = self.imageView.bounds;
+        [self updateScrollViewZoomScales];
         [self.scrollView zoomToRect:frame animated:NO];
     }
 }
+
 
 - (UIView *)viewForZoomingInScrollView:(UIScrollView *)scrollView {
     
